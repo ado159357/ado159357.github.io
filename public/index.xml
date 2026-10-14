@@ -6,14 +6,28 @@
     <description>Recent content on 我的个人博客</description>
     <generator>Hugo</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Tue, 13 Oct 2026 09:41:49 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 14 Oct 2026 08:00:00 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Hello World</title>
       <link>http://localhost:1313/posts/hello-world/</link>
-      <pubDate>Tue, 13 Oct 2026 09:41:49 +0800</pubDate>
+      <pubDate>Wed, 14 Oct 2026 08:00:00 +0800</pubDate>
       <guid>http://localhost:1313/posts/hello-world/</guid>
-      <description>&lt;p&gt;这是我的第一篇博客文章！&lt;strong&gt;Hugo&lt;/strong&gt; 真的很酷。&lt;/p&gt;</description>
+      <description>&lt;p&gt;这里会记录下我的学习动态&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>2026-10-0701</title>
+      <link>http://localhost:1313/posts/2026100701/</link>
+      <pubDate>Wed, 07 Oct 2026 13:28:36 +0800</pubDate>
+      <guid>http://localhost:1313/posts/2026100701/</guid>
+      <description>&lt;p&gt;2841.几乎唯一子数组的最大和-力扣(LeetCode)&amp;ndash;中等&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>2026/10/07</title>
+      <link>http://localhost:1313/posts/20261007/</link>
+      <pubDate>Wed, 07 Oct 2026 13:28:36 +0800</pubDate>
+      <guid>http://localhost:1313/posts/20261007/</guid>
+      <description>&lt;p&gt;2841.几乎唯一子数组的最大和-力扣(LeetCode)&amp;ndash;中等&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

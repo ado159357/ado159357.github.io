@@ -1,0 +1,13 @@
+/* 1. 隐藏所有文章卡片内部的透明跳转链接 */
+.entry-link {
+    display: none !important;
+    pointer-events: none;
+}
+
+/* 2. 将鼠标指针恢复为默认箭头 */
+.first-entry,
+.post-entry,
+.entry-header h2,
+.entry-content {
+    cursor: default !important;
+}

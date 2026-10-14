@@ -1,6 +1,7 @@
 +++
-date = '2026-10-13T09:41:49+08:00'
-draft = false
+date = '2026-10-14T08:00:00+08:00'
+weight=1
+draft = true
 title = 'Hello World'
 +++
-这是我的第一篇博客文章！**Hugo** 真的很酷。
+这里会记录下我的学习动态
