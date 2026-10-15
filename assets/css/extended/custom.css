@@ -1,13 +1,153 @@
-/* 1. 隐藏所有文章卡片内部的透明跳转链接 */
-.entry-link {
-    display: none !important;
-    pointer-events: none;
+/* ===== ① 卡片交互 ===== */
+.entry-link { display: none !important; }
+.first-entry, .post-entry, .entry-header h2, .entry-content { cursor: default !important; }
+
+/* ===== ② 暖色配色变量（强制浅色模式） ===== */
+:root, :root[data-theme=dark] {
+    --theme: #ffffff;
+    --entry: rgba(255, 252, 246, .72);
+    --primary: #3d3226;
+    --secondary: #8a7a66;
+    --tertiary: #c9b9a3;
+    --content: #4a3f33;
+    --code-bg: #ffffff;
+    --code-block-bg: #ffffff;
+    --border: #ffffff;
+    color-scheme: light;
 }
 
-/* 2. 将鼠标指针恢复为默认箭头 */
-.first-entry,
-.post-entry,
-.entry-header h2,
-.entry-content {
-    cursor: default !important;
+#theme-toggle { display: none !important; }
+html { background-color: #ffffff; }
+body { background-color: transparent !important; }
+
+/* ===== ③ 右侧羽化人物背景 ===== */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0 0 0 auto;
+    width: 55%;
+    background: url('/images/bg.jpg') center / cover no-repeat;
+    mask-image: linear-gradient(to right, transparent, #000 50%, transparent);
+    filter: grayscale(1);
+    pointer-events: none; z-index: 0;
+}
+
+/* ===== ④ 左侧装饰：暖金光晕 + 细网格 ===== */
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse at 15% 85%, rgba(212, 175, 120, .12), transparent 55%),
+        radial-gradient(ellipse at 5% 10%,  rgba(196, 150, 90, .06),  transparent 40%),
+        linear-gradient(rgba(138, 122, 102, .028) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(138, 122, 102, .028) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+}
+
+/* ===== ⑤ 内容层与毛玻璃卡片 ===== */
+.main, .footer { position: relative; z-index: 1; }
+.first-entry, .post-entry, .post-single {
+    background-color: var(--entry) !important;
+    backdrop-filter: blur(6px);
+    border-radius: 12px;
+}
+
+/* ===== ⑥ 左下角图灵名言 ===== */
+.footer::before {
+    content: "\201CWe can only see a short distance ahead, but we can see plenty there that needs to be done.\201D  \2014\2014 Alan Turing\A \A \201CMachines take me by surprise with great frequency.\201D  \2014\2014 Alan Turing\A \A \201CSometimes it is the people no one imagines anything of who do the things no one can imagine.\201D  \2014\2014 Alan Turing";
+    position: fixed;
+    top: 65%;
+    left: 2rem;
+    max-width: 380px;
+    font-size: 14px; font-weight: 500; font-style: italic;
+    line-height: 1.75; letter-spacing: .3px;
+    color: #6b5a45; opacity: .62;
+    white-space: pre-line;
+    pointer-events: none; z-index: 0;
+}
+
+/* ===== ⑦ 标题前暖棕金竖线 ===== */
+.header .logo a::before {
+    content: "";
+    display: inline-block;
+    width: 3px; height: 1em;
+    background: #c9962f;
+    margin-right: .5rem;
+    vertical-align: middle;
+    border-radius: 2px;
+}
+
+/* ===== ⑧ 移动端适配 ===== */
+@media (max-width: 768px) {
+    body::before { width: 100%; opacity: .18; mask-image: none; }
+    .footer::before { display: none; }
+}
+/* ===== 悬浮客服菜单（横排 - 黑白线框风格） ===== */
+.sidebar-menu {
+    position: fixed;
+    bottom: 70%;        
+    left: 10%;        
+    transform: translateX(-50%);
+    /* ↓ 背景改成纯白 */
+    background: transparent;
+    /* ↓ 加上黑色边框 */
+    border: 1px solid #000000;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: row;
+    overflow: visible;
+    z-index: 9999;
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    /* ↓ 去除 Emoji 的彩色，变成黑白 */
+    filter: grayscale(100%);
+    font-size: 22px;
+    text-decoration: none;
+    /* ↓ 分隔线改成浅黑色 */
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.sidebar-item:last-child { border-right: none; }
+
+/* 鼠标悬停时的背景色（浅灰） */
+.sidebar-item:hover { 
+    background: rgba(0, 0, 0, 0.05); 
+}
+
+/* 悬停文字提示（保持原样） */
+.sidebar-item::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 8px;
+    background: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar-item:hover::after { opacity: 1; }
+
+/* 移动端隐藏 */
+@media (max-width: 1024px) {
+    .sidebar-menu { display: none !important; }
 }

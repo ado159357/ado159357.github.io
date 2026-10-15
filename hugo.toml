@@ -3,7 +3,6 @@ languageCode = "zh-cn"
 title = "我的个人博客"
 theme = "PaperMod"
 
-# 以下为 PaperMod 的基础推荐配置
 [params]
   env = "production"
   ShowReadingTime = true
