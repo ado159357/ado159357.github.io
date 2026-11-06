@@ -177,13 +177,12 @@
   .item .k { margin-bottom: 4px; font-size: 12px; color: #94a3b8; }
   .item .v { font-size: 15px; font-weight: 600; }
 
-  /* ---------- 底部操作区（含预览） ---------- */
-  .actions {
+  /* ---------- 独立的操作区 ---------- */
+  .action-bar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 12px;
-    margin-top: 18px;
+    padding: 16px 22px; /* 比普通卡片稍微紧凑一点 */
   }
 
   .copy-preview {
@@ -207,7 +206,7 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
 
-  .actions button {
+  .action-bar button {
     flex-shrink: 0;
     padding: 10px 18px;
     font-size: 14px;
@@ -220,8 +219,8 @@
     box-shadow: 0 8px 18px -8px rgba(79, 70, 229, .9);
     transition: background .15s, transform .1s;
   }
-  .actions button:hover  { background: #4338ca; }
-  .actions button:active { transform: translateY(1px); }
+  .action-bar button:hover  { background: #4338ca; }
+  .action-bar button:active { transform: translateY(1px); }
 
   .footnote {
     margin: 0;
@@ -233,10 +232,10 @@
 
   @media (max-width: 420px) {
     body { padding: 20px 12px 48px; }
-    .card { padding: 18px; }
+    .card, .action-bar { padding: 18px; }
     .big b { font-size: 34px; }
-    .actions { flex-direction: column; align-items: stretch; }
-    .actions button { width: 100%; }
+    .action-bar { flex-direction: column; align-items: stretch; }
+    .action-bar button { width: 100%; }
   }
 </style>
 </head>
@@ -272,6 +271,12 @@
     </div>
   </section>
 
+  <!-- 操作区（已移动到这里） -->
+  <section class="card action-bar">
+    <div class="copy-preview" id="copyPreview"></div>
+    <button type="button" id="copyBtn">复制结果</button>
+  </section>
+
   <!-- 结果区 -->
   <section class="card result" id="result">
     <div class="result-top">
@@ -281,10 +286,6 @@
     <div class="big" id="big">—</div>
     <div class="progress"><span id="bar"></span></div>
     <div class="grid" id="grid"></div>
-    <div class="actions">
-      <div class="copy-preview" id="copyPreview"></div>
-      <button type="button" id="copyBtn">复制结果</button>
-    </div>
   </section>
 
   <p class="footnote">
@@ -296,47 +297,6 @@
 </div>
 
 <script>
-/* =========================================
-   防护代码 1：禁用右键、复制、F12、Ctrl+Shift+I 等
-   ========================================= */
-document.addEventListener('contextmenu', function(e) {
-  e.preventDefault(); // 屏蔽右键
-});
-
-document.addEventListener('keydown', function(e) {
-  // F12
-  if (e.key === 'F12') { e.preventDefault(); return false; }
-  // Ctrl+Shift+I / J / C (开发者工具)
-  if (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].indexOf(e.key.toUpperCase()) > -1) {
-    e.preventDefault(); return false;
-  }
-  // Ctrl+U (查看源代码)
-  if (e.ctrlKey && e.key.toUpperCase() === 'U') {
-    e.preventDefault(); return false;
-  }
-});
-
-/* =========================================
-   防护代码 2：防调试（无限 debugger）
-   如果强行打开了控制台，代码会卡在 debugger 处无法执行
-   ========================================= */
-(function() {
-  var check = function() {
-    var start = performance.now();
-    debugger;
-    var end = performance.now();
-    // 如果 debugger 生效，时间会明显变长
-    if (end - start > 100) {
-      document.body.innerHTML = '<div style="padding:50px;text-align:center;font-family:sans-serif;color:#ef4444;"><h2>检测到非法调试</h2><p>请关闭开发者工具并刷新页面。</p></div>';
-    }
-  };
-  // 每 1 秒检测一次
-  setInterval(check, 1000);
-})();
-
-/* =========================================
-   原计算器核心逻辑
-   ========================================= */
 (function () {
   'use strict';
 
