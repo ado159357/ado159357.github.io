@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>BOM 智能需求计算器 (云端同步版)</title>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <style>
+        body { font-family: 'Microsoft YaHei', sans-serif; padding: 20px; background-color: #f4f6f9; color: #333; }
+        .container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #2c3e50; }
+        
+        .upload-area { border: 2px dashed #0052d9; padding: 20px; text-align: center; border-radius: 8px; background: #f0f7ff; cursor: pointer; margin-bottom: 20px; transition: 0.3s; }
+        .upload-area:hover { background: #e0efff; }
+        .upload-area.success { border-color: #52c41a; background: #f6ffed; }
+        .upload-area.warning { border-color: #faad14; background: #fffbe6; }
+        input[type="file"] { display: none; }
+
+        .order-panel { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; margin-bottom: 20px; }
+        .order-item { display: flex; align-items: center; margin-bottom: 10px; gap: 15px; }
+        .order-item label { font-weight: bold; width: 450px; display: flex; align-items: center; }
+        .order-item input[type="number"] { padding: 6px; border: 1px solid #ccc; border-radius: 4px; width: 100px; }
+        
+        .unit-tag { font-size: 12px; color: #d93025; background: #fff1f0; border: 1px solid #ffa39e; padding: 1px 6px; border-radius: 4px; margin-left: 8px; font-weight: normal; }
+        
+        .add-custom-area { display: flex; gap: 10px; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ccc; align-items: center; }
+        .search-container { position: relative; width: 400px; }
+        .search-container input[type="text"] { width: 100%; padding: 8px; border: 2px solid #0052d9; border-radius: 4px; box-sizing: border-box; font-size: 14px; outline: none; }
+        
+        .dropdown-list { position: absolute; top: 100%; left: 0; right: 0; max-height: 250px; overflow-y: auto; background: #fff; border: 1px solid #0052d9; border-radius: 4px; margin-top: 2px; box-shadow: 0 8px 16px rgba(0,0,0,0.2); z-index: 1000; display: none; }
+        .dropdown-item { padding: 10px 12px; cursor: pointer; font-size: 14px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; }
+        .dropdown-item:hover { background-color: #e6f7ff; color: #0052d9; font-weight: bold; }
+        .no-result { padding: 10px; color: #999; font-size: 14px; text-align: center; }
+
+        .btn-add { padding: 8px 15px; background-color: #52c41a; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-add:hover { background-color: #389e0d; }
+        .btn-remove { background: none; border: none; color: #ff4d4f; cursor: pointer; font-weight: bold; font-size: 18px; margin-left: 10px; }
+        
+        button.calc-btn { padding: 10px 20px; background-color: #0052d9; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; margin-top: 15px;}
+        button.calc-btn:hover { background-color: #003cab; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f8f9fa; color: #0052d9; }
+        
+        .legend { display: flex; gap: 20px; font-size: 14px; margin-bottom: 10px; align-items: center; }
+        .legend span { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 5px; }
+        
+        .row-finished { background-color: #e6f7ff !important; }
+        .row-semi { background-color: #fff3e0 !important; }
+        .row-material { background-color: #ffffff; }
+        
+        .badge { font-size: 12px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: bold; }
+        .badge-finished { background: #bae0ff; color: #003eb3; border: 1px solid #91caff; }
+        .badge-semi { background: #ffe7ba; color: #d46b08; border: 1px solid #ffd591; }
+        .badge-material { background: #f5f5f5; color: #595959; border: 1px solid #d9d9d9; }
+        
+        .empty-tip { color: #999; font-size: 14px; margin: 10px 0; font-style: italic;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📦 BOM 智能需求计算器</h1>
+        
+        <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+            <p id="uploadText">⏳ 正在从云端自动加载最新 BOM 数据...</p>
+            <p style="font-size:12px; color:#666; margin-top:5px;" id="uploadSubText">加载超时或文件被修改时，可点击此处手动上传覆盖</p>
+            <input type="file" id="fileInput" accept=".xlsx, .xls" onchange="handleFileInput(this.files[0])">
+        </div>
+
+        <div class="order-panel" id="orderPanel" style="display:none;">
+            <h3>1. 输入生产/备货需求</h3>
+            <div id="productList">
+                <div class="empty-tip" id="emptyTip">暂无需求，请从下方搜索框中选择...</div>
+            </div>
+            
+            <div class="add-custom-area">
+                <span>➕ 添加需求：</span>
+                <div class="search-container" id="searchContainer">
+                    <input type="text" id="searchInput" placeholder="输入中文、拼音首字母(如 pd)或全拼..." autocomplete="off">
+                    <div class="dropdown-list" id="dropdownList"></div>
+                </div>
+                <button class="btn-add" onclick="addCustomInput()">添加</button>
+            </div>
+
+            <button class="calc-btn" onclick="calculate()">开始计算总需求</button>
+        </div>
+
+        <div id="resultArea" style="display: none;">
+            <h2>📊 最终物料汇总需求</h2>
+            <div class="legend">
+                <div><span style="background:#bae0ff; border:1px solid #91caff;"></span>成品 (Level 0)</div>
+                <div><span style="background:#ffe7ba; border:1px solid #ffd591;"></span>半成品 (需加工)</div>
+                <div><span style="background:#ffffff; border:1px solid #d9d9d9;"></span>底层原材料</div>
+            </div>
+            <table id="resultTable">
+                <thead>
+                    <tr>
+                        <th>物料名称</th>
+                        <th>层级</th>
+                        <th>总需求数量</th>
+                    </tr>
+                </thead>
+                <tbody id="resultBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let globalBomList = [];
+        let allSearchOptions = []; 
+
+        // ================= 云端与本地加载逻辑 =================
+        window.onload = function() {
+            const CLOUD_XLSX_URL = 'https://ado159357.github.io/plan.xlsx';
+
+            // 发起跨域请求获取云端最新文件
+            fetch(CLOUD_XLSX_URL, { mode: 'cors', cache: 'no-store' })
+                .then(response => {
+                    if (!response.ok) throw new Error("网络请求失败: " + response.status);
+                    return response.arrayBuffer();
+                })
+                .then(buffer => {
+                    const data = new Uint8Array(buffer);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+                    
+                    // 更新本地缓存备份
+                    localStorage.setItem('bom_data_cache', JSON.stringify(json));
+                    
+                    processData(json);
+                    document.getElementById('uploadArea').classList.add('success');
+                    document.getElementById('uploadText').innerHTML = "✅ 已自动从云端同步最新 BOM";
+                    document.getElementById('uploadSubText').innerHTML = "数据已实时更新，点击可手动覆盖临时修改";
+                })
+                .catch(err => {
+                    console.warn("云端加载失败，尝试读取缓存：", err);
+                    const cached = localStorage.getItem('bom_data_cache');
+                    if (cached) {
+                        try {
+                            processData(JSON.parse(cached));
+                            document.getElementById('uploadArea').classList.add('warning');
+                            document.getElementById('uploadText').innerHTML = "⚠️ 云端加载失败，已回退至本地缓存数据";
+                            document.getElementById('uploadSubText').innerHTML = "点击此处可手动上传新文件";
+                        } catch (e) {
+                            showManualPrompt();
+                        }
+                    } else {
+                        showManualPrompt();
+                    }
+                });
+        };
+
+        function showManualPrompt() {
+            document.getElementById('uploadArea').classList.remove('success', 'warning');
+            document.getElementById('uploadText').innerHTML = "📄 无法自动连接云端，请手动选择 Excel 文件";
+            document.getElementById('uploadSubText').innerHTML = "必须包含列：产品名称、单位、数量、层级、父记录、展示";
+        }
+
+        function handleFileInput(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+                
+                localStorage.setItem('bom_data_cache', JSON.stringify(json));
+                processData(json);
+                
+                document.getElementById('uploadArea').classList.remove('warning');
+                document.getElementById('uploadArea').classList.add('success');
+                document.getElementById('uploadText').innerHTML = "✅ 临时覆盖成功（已载入本地文件）";
+                document.getElementById('uploadSubText').innerHTML = "点击此处可重新上传覆盖";
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // ================= 拼音搜索与计算引擎 =================
+        function getPinyinInitials(str) {
+            const firstLetter = "ABCDEFGHJKLMNOPQRSTWXYZ";
+            const boundaryChar = "阿八嚓哒妸发旮哈讥咔垃痳拏噢妑七呥扨它穵夕丫帀";
+            let ret = "";
+            for (let i = 0; i < str.length; i++) {
+                const c = str.charAt(i);
+                if (/[\u4e00-\u9fa5]/.test(c)) {
+                    let matched = false;
+                    for (let j = 0; j < boundaryChar.length; j++) {
+                        if (c.localeCompare(boundaryChar[j], "zh-CN") >= 0 && c.localeCompare(boundaryChar[j+1], "zh-CN") < 0) {
+                            ret += firstLetter[j]; matched = true; break;
+                        }
+                    }
+                    if (!matched) ret += c; 
+                } else { ret += c.toUpperCase(); }
+            }
+            return ret;
+        }
+
+        const searchInput = document.getElementById('searchInput');
+        const dropdownList = document.getElementById('dropdownList');
+
+        document.addEventListener('click', function(e) {
+            if (!document.getElementById('searchContainer').contains(e.target)) {
+                dropdownList.style.display = 'none';
+            }
+        });
+
+        searchInput.addEventListener('input', function() { renderDropdown(this.value.trim()); });
+        searchInput.addEventListener('focus', function() { renderDropdown(this.value.trim()); });
+
+        function renderDropdown(keyword) {
+            dropdownList.innerHTML = '';
+            if (!keyword) { displayFilteredOptions(allSearchOptions.slice(0, 30)); return; }
+
+            const upperKeyword = keyword.toUpperCase();
+            const filtered = allSearchOptions.filter(opt => {
+                if (opt.name.toUpperCase().includes(upperKeyword)) return true;
+                if (getPinyinInitials(opt.name).includes(upperKeyword)) return true;
+                return false;
+            });
+            displayFilteredOptions(filtered);
+        }
+
+        function displayFilteredOptions(filtered) {
+            if (filtered.length === 0) {
+                dropdownList.innerHTML = '<div class="no-result">未找到匹配物料</div>';
+            } else {
+                filtered.forEach(opt => {
+                    const div = document.createElement('div');
+                    div.className = 'dropdown-item';
+                    div.innerHTML = `<span>${opt.name}</span><span style="color:#999;font-size:12px;">${opt.unit ? opt.unit : ''}</span>`;
+                    div.onclick = function() {
+                        searchInput.value = opt.name;
+                        dropdownList.style.display = 'none';
+                    };
+                    dropdownList.appendChild(div);
+                });
+            }
+            dropdownList.style.display = 'block';
+        }
+
+        function processData(json) {
+            const headers = json[0].map(h => String(h).trim());
+            const colName = headers.findIndex(h => h.includes('名称'));
+            const colUnit = headers.findIndex(h => h.includes('单位'));
+            const colQty = headers.findIndex(h => h.includes('数量') || h.includes('用量') || h.includes('单耗'));
+            const colLevel = headers.findIndex(h => h.includes('层级'));
+            const colParent = headers.findIndex(h => h.includes('父记录') || h.includes('父件'));
+            const colDisplay = headers.findIndex(h => h.includes('展示'));
+
+            if (colName === -1 || colQty === -1 || colLevel === -1 || colParent === -1 || colDisplay === -1) {
+                alert("表头缺少必要的列！请确保包含：产品名称、数量、层级、父记录、展示");
+                return;
+            }
+
+            globalBomList = [];
+            allSearchOptions = [];
+            const displayMatSet = new Set(); 
+
+            for (let i = 1; i < json.length; i++) {
+                const row = json[i];
+                if (!row[colName]) continue;
+                
+                const itemName = String(row[colName]).trim();
+                const itemLevel = parseInt(row[colLevel]) || 0;
+                const itemUnit = colUnit !== -1 ? String(row[colUnit]).trim() : '';
+                
+                globalBomList.push({
+                    name: itemName,
+                    qty: parseFloat(row[colQty]) || 0,
+                    level: itemLevel,
+                    parent: String(row[colParent]).trim(),
+                    unit: itemUnit
+                });
+
+                const displayVal = String(row[colDisplay]).trim();
+                if (displayVal === '1' && !displayMatSet.has(itemName)) {
+                    displayMatSet.add(itemName);
+                    allSearchOptions.push({ name: itemName, level: itemLevel, unit: itemUnit });
+                }
+            }
+            
+            globalBomList.sort((a, b) => a.level - b.level);
+            allSearchOptions.sort((a, b) => a.level - b.level);
+
+            document.getElementById('productList').innerHTML = '<div class="empty-tip" id="emptyTip">暂无需求，请从下方搜索框中选择...</div>';
+            searchInput.value = '';
+
+            document.getElementById('orderPanel').style.display = 'block';
+            document.getElementById('resultArea').style.display = 'none';
+        }
+
+        function addCustomInput() {
+            const typedVal = searchInput.value.trim();
+            const exactMatch = allSearchOptions.find(opt => opt.name === typedVal);
+            if (exactMatch) { applyInput(exactMatch.name); return; }
+
+            const upperKeyword = typedVal.toUpperCase();
+            const fuzzyMatch = allSearchOptions.find(opt => 
+                opt.name.toUpperCase().includes(upperKeyword) || 
+                getPinyinInitials(opt.name).includes(upperKeyword)
+            );
+
+            if (fuzzyMatch) { applyInput(fuzzyMatch.name); } 
+            else { alert("未找到该物料，请从下拉列表中点击选中！"); }
+        }
+
+        function applyInput(targetMat) {
+            const existing = document.querySelector(`.req-input[data-name="${targetMat}"]`);
+            if (existing) { alert("该物料已在输入列表中，请直接修改数量！"); return; }
+
+            const emptyTip = document.getElementById('emptyTip');
+            if (emptyTip) emptyTip.remove();
+
+            const itemInfo = allSearchOptions.find(x => x.name === targetMat);
+            const isTop = itemInfo && itemInfo.level === 0;
+            const unitStr = itemInfo && itemInfo.unit ? itemInfo.unit : '';
+
+            document.getElementById('productList').appendChild(createInputRow(targetMat, isTop, unitStr));
+            searchInput.value = '';
+            dropdownList.style.display = 'none';
+        }
+
+        function createInputRow(name, isTop, unit) {
+            const div = document.createElement('div');
+            div.className = 'order-item';
+            const icon = isTop ? '🏆' : '🔹';
+            const unitTag = unit ? `<span class="unit-tag">${unit}</span>` : '';
+            div.innerHTML = `
+                <label>${icon} ${name} ${unitTag}</label>
+                <input type="number" class="req-input" data-name="${name}" value="0" min="0" placeholder="输入数量">
+                <button class="btn-remove" onclick="this.parentElement.remove(); checkEmpty()">✖</button>
+            `;
+            return div;
+        }
+
+        function checkEmpty() {
+            const productListDiv = document.getElementById('productList');
+            if (productListDiv.querySelectorAll('.order-item').length === 0) {
+                productListDiv.innerHTML = '<div class="empty-tip" id="emptyTip">暂无需求，请从下方搜索框中选择...</div>';
+            }
+        }
+
+        function calculate() {
+            let requirements = {};
+            let activeOrders = 0;
+
+            const inputs = document.querySelectorAll('.req-input');
+            inputs.forEach(input => {
+                const name = input.getAttribute('data-name');
+                const val = parseFloat(input.value) || 0;
+                if (val > 0) {
+                    requirements[name] = (requirements[name] || 0) + val;
+                    activeOrders += val;
+                }
+            });
+
+            if (activeOrders === 0) { alert("请输入至少一个需求数量！"); return; }
+
+            for (let item of globalBomList) {
+                if (item.level === 0) continue;
+                const parentRequirement = requirements[item.parent] || 0;
+                const currentRequirement = parentRequirement * item.qty;
+                if (currentRequirement > 0) {
+                    requirements[item.name] = (requirements[item.name] || 0) + currentRequirement;
+                }
+            }
+
+            const tbody = document.getElementById('resultBody');
+            tbody.innerHTML = '';
+            
+            let parentSet = new Set();
+            globalBomList.forEach(item => { if (item.parent !== '') parentSet.add(item.parent); });
+
+            const uniqueItems = new Map();
+            for (let item of globalBomList) {
+                if (!uniqueItems.has(item.name)) { uniqueItems.set(item.name, item); } 
+                else {
+                    const existingItem = uniqueItems.get(item.name);
+                    if (item.level < existingItem.level) uniqueItems.set(item.name, item);
+                }
+            }
+
+            const displayList = Array.from(uniqueItems.values()).sort((a, b) => a.level - b.level);
+            
+            for (let item of displayList) {
+                const totalReq = requirements[item.name] || 0;
+                if (totalReq > 0) {
+                    const tr = document.createElement('tr');
+                    let typeLabel = "", rowClass = "";
+                    
+                    if (item.level === 0) { rowClass = "row-finished"; typeLabel = "<span class='badge badge-finished'>成品</span>"; } 
+                    else if (parentSet.has(item.name)) { rowClass = "row-semi"; typeLabel = "<span class='badge badge-semi'>半成品</span>"; } 
+                    else { rowClass = "row-material"; typeLabel = "<span class='badge badge-material'>原料</span>"; }
+                    
+                    tr.className = rowClass;
+                    let indent = item.level === 0 ? '🏆 ' : '└─ '.repeat(item.level);
+                    const unitStr = item.unit ? ` ${item.unit}` : '';
+
+                    tr.innerHTML = `
+                        <td>${indent}${item.name} ${typeLabel}</td>
+                        <td>${item.level}</td>
+                        <td style="color: #d93025; font-weight: bold;">${totalReq} ${unitStr}</td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            }
+            document.getElementById('resultArea').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
