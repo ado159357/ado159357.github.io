@@ -36,18 +36,18 @@
   .card {
     background: #fff;
     border: 1px solid rgba(226, 232, 240, .9);
-    border-radius: 18px;
-    padding: 22px;
-    margin-bottom: 18px;
+    border-radius: 16px;      /* 圆角稍微收敛一点，看起来更干练 */
+    padding: 20px;            /* 卡片内边距从 22px 缩到 20px */
+    margin-bottom: 16px;      /* 卡片间距稍微缩小 */
     box-shadow: 0 12px 32px -14px rgba(15, 23, 42, .2),
                 0 2px 8px rgba(15, 23, 42, .04);
   }
 
-  .field + .field { margin-top: 16px; }
+  .field + .field { margin-top: 14px; }
 
   label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 6px;       /* 标签下边距缩小 */
     font-size: 13px;
     font-weight: 600;
     color: #475569;
@@ -55,47 +55,39 @@
 
   input, select {
     width: 100%;
-    padding: 11px 12px;
-    font-size: 15px;
+    padding: 10px 12px;       /* 输入框内边距稍微调小，显得没那么笨重 */
+    font-size: 14px;          /* 字体从 15px 缩到 14px */
     font-family: inherit;
     color: #0f172a;
     background: #f8fafc;
     border: 1px solid #cbd5e1;
-    border-radius: 10px;
+    border-radius: 8px;       /* 输入框圆角缩小，配合整体风格 */
     outline: none;
     transition: border-color .15s, box-shadow .15s, background .15s;
   }
   input:focus, select:focus {
     background: #fff;
     border-color: #6366f1;
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, .15);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, .15);
   }
 
   .row {
     display: grid;
-    grid-template-columns: 1fr 120px;
+    grid-template-columns: 1fr 110px; /* 右侧单位框稍微缩窄一点 */
     gap: 10px;
   }
 
-  /* 👇 预设按钮区域修改 👇 */
+  /* 快捷按钮区域 */
   .presets {
     display: flex;
-    flex-wrap: nowrap;      /* 强制不折行 */
-    overflow-x: auto;       /* 超出时允许横向滑动 */
-    gap: 8px;
-    margin-top: 12px;
-    padding-bottom: 4px;    /* 留出一点底部空间，防止滚动条遮挡 */
-    -webkit-overflow-scrolling: touch; /* iOS 顺滑滚动 */
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
   }
-  /* 隐藏滚动条，让界面更干净 */
-  .presets::-webkit-scrollbar {
-    display: none;
-  }
-  
   .presets button {
-    flex-shrink: 0;         /* 保证按钮不会被挤压变形 */
-    padding: 7px 14px;
-    font-size: 13px;
+    flex-shrink: 0;
+    padding: 5px 10px;
+    font-size: 12px;
     font-family: inherit;
     color: #475569;
     background: #f8fafc;
@@ -104,8 +96,6 @@
     cursor: pointer;
     transition: all .15s;
   }
-  /* 👆 修改结束 👆 */
-
   .presets button:hover {
     color: #4338ca;
     background: #eef2ff;
@@ -127,8 +117,8 @@
   }
 
   .badge {
-    padding: 5px 12px;
-    font-size: 13px;
+    padding: 4px 10px;
+    font-size: 12px;
     font-weight: 600;
     color: #64748b;
     background: #eef2f7;
@@ -141,15 +131,15 @@
   .hint { font-size: 12px; color: #94a3b8; }
 
   .big {
-    margin: 20px 0 0;
-    font-size: 15px;
+    margin: 16px 0 0;
+    font-size: 14px;
     color: #475569;
   }
   .big b {
-    margin: 0 6px;
-    font-size: 40px;
+    margin: 0 4px;
+    font-size: 36px;          /* 大数字从 40px 缩到 36px，显得更秀气 */
     font-weight: 800;
-    letter-spacing: -1.5px;
+    letter-spacing: -1px;
     color: #4f46e5;
     vertical-align: -2px;
   }
@@ -157,8 +147,8 @@
   .result.expired .big b { color: #dc2626; }
 
   .progress {
-    height: 10px;
-    margin: 16px 0 0;
+    height: 8px;              /* 进度条从 10px 缩到 8px */
+    margin: 14px 0 0;
     background: #eef2f7;
     border-radius: 999px;
     overflow: hidden;
@@ -174,40 +164,41 @@
   .result.warn    .progress span { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
   .result.expired .progress span { background: linear-gradient(90deg, #ef4444, #f87171); }
 
+  /* 结果明细卡片 */
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-    margin-top: 18px;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); /* 稍微缩窄卡片最小宽度 */
+    gap: 10px;
+    margin-top: 16px;
   }
   .item {
-    padding: 12px 14px;
+    padding: 10px 12px;       /* 明细卡片内边距缩小 */
     background: #f8fafc;
     border: 1px solid #eef2f7;
-    border-radius: 12px;
+    border-radius: 10px;
   }
-  .item .k { margin-bottom: 4px; font-size: 12px; color: #94a3b8; }
-  .item .v { font-size: 15px; font-weight: 600; }
+  .item .k { margin-bottom: 2px; font-size: 11px; color: #94a3b8; } /* 说明文字调小 */
+  .item .v { font-size: 14px; font-weight: 600; } /* 数值从 15px 缩到 14px */
 
   /* ---------- 独立的操作区 ---------- */
   .action-bar {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 16px 22px;
+    gap: 10px;
+    padding: 14px 20px;       /* 操作区内边距稍微缩小 */
   }
 
   .copy-preview {
     flex: 1;
     min-width: 0;
-    padding: 10px 14px;
+    padding: 8px 12px;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    font-size: 15px;
+    font-size: 14px;          /* 预览文字从 15px 缩到 14px */
     font-weight: 600;
     color: #1e293b;
     background: #f1f5f9;
     border: 1px dashed #cbd5e1;
-    border-radius: 10px;
+    border-radius: 8px;
     word-break: break-all;
     transition: all .15s;
   }
@@ -220,15 +211,15 @@
 
   .action-bar button {
     flex-shrink: 0;
-    padding: 10px 18px;
-    font-size: 14px;
+    padding: 9px 16px;
+    font-size: 13px;          /* 按钮文字从 14px 缩到 13px */
     font-family: inherit;
     color: #fff;
     background: #4f46e5;
     border: none;
-    border-radius: 10px;
+    border-radius: 8px;
     cursor: pointer;
-    box-shadow: 0 8px 18px -8px rgba(79, 70, 229, .9);
+    box-shadow: 0 6px 16px -6px rgba(79, 70, 229, .8);
     transition: background .15s, transform .1s;
   }
   .action-bar button:hover  { background: #4338ca; }
@@ -244,10 +235,10 @@
 
   @media (max-width: 420px) {
     body { padding: 20px 12px 48px; }
-    .card, .action-bar { padding: 18px; }
-    .big b { font-size: 34px; }
+    .card, .action-bar { padding: 16px; }
+    .big b { font-size: 32px; }
     .action-bar { flex-direction: column; align-items: stretch; }
-    .action-bar button { width: 100%; }
+    .action-bar button { width: 100%; padding: 10px 16px; }
   }
 </style>
 </head>
@@ -286,7 +277,7 @@
     </div>
   </section>
 
-  <!-- 操作区（已移动到这里） -->
+  <!-- 操作区 -->
   <section class="card action-bar">
     <div class="copy-preview" id="copyPreview"></div>
     <button type="button" id="copyBtn">复制结果</button>
