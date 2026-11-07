@@ -23,13 +23,13 @@
   .app { width: 100%; max-width: 680px; }
 
   header h1 {
-    margin: 0 0 8px;
-    font-size: 26px;
+    margin: 0 0 6px;
+    font-size: 20px;
     letter-spacing: .5px;
   }
   header p {
-    margin: 0 0 24px;
-    font-size: 14px;
+    margin: 0 0 20px;
+    font-size: 13px;
     color: #64748b;
   }
 
@@ -77,13 +77,23 @@
     gap: 10px;
   }
 
+  /* 👇 预设按钮区域修改 👇 */
   .presets {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;      /* 强制不折行 */
+    overflow-x: auto;       /* 超出时允许横向滑动 */
     gap: 8px;
     margin-top: 12px;
+    padding-bottom: 4px;    /* 留出一点底部空间，防止滚动条遮挡 */
+    -webkit-overflow-scrolling: touch; /* iOS 顺滑滚动 */
   }
+  /* 隐藏滚动条，让界面更干净 */
+  .presets::-webkit-scrollbar {
+    display: none;
+  }
+  
   .presets button {
+    flex-shrink: 0;         /* 保证按钮不会被挤压变形 */
     padding: 7px 14px;
     font-size: 13px;
     font-family: inherit;
@@ -94,6 +104,8 @@
     cursor: pointer;
     transition: all .15s;
   }
+  /* 👆 修改结束 👆 */
+
   .presets button:hover {
     color: #4338ca;
     background: #eef2ff;
@@ -182,7 +194,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 16px 22px; /* 比普通卡片稍微紧凑一点 */
+    padding: 16px 22px;
   }
 
   .copy-preview {
@@ -266,7 +278,7 @@
       <div class="presets">
         <button type="button" class="preset active" data-len="3"  data-unit="month">3个月</button>
         <button type="button" class="preset" data-len="6"  data-unit="month">6个月</button>
-        <button type="button" class="preset" data-len="40" data-unit="day">40 天</button>
+        <button type="button" class="preset" data-len="45" data-unit="day">45 天</button>
         <button type="button" class="preset" data-len="60" data-unit="day">60 天</button>
         <button type="button" class="preset" data-len="90" data-unit="day">90 天</button>
         <button type="button" class="preset" data-len="100" data-unit="day">100 天</button>
